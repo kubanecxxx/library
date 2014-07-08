@@ -1,0 +1,3 @@
+RF24_DIRR := $(LIBRARIES)/rf24_app
+CPPFILES +=  $(RF24_DIRR)/RF24app.cpp
+INCDIR += $(RF24_DIRR)  
