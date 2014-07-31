@@ -1,0 +1,3 @@
+FONTS_DIR := $(LIBRARIES)/fonts
+CFILES += $(FONTS_DIR)/fonts.c
+INCDIR += $(FONTS_DIR)  

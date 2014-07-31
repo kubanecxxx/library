@@ -20,7 +20,7 @@ packetHandling::packetHandling(RF24_app * app, const callback_table_t * cfg) :
 	chDbgAssert(cfg, "config is NULL", "");
 
 	auto_idle.Setup(idle, this, MS2ST(2000), PERIODIC);
-	wdt = NULL;
+	ft = NULL;
 	last = chTimeNow();
 }
 
@@ -35,9 +35,14 @@ void packetHandling::HandlePacketLoop()
 
 	const callback_table_t * t = table;
 
+	if (((command | WRITE_FLAG) == (MCU_RESET | WRITE_FLAG)) && ft && ft->resetMcu)
+	{
+		ft->resetMcu();
+	}
+
 	while (t->cb)
 	{
-		if ((command & ~WRITE_FLAG) == t->command)
+		if ((command | WRITE_FLAG) == (t->command | WRITE_FLAG))
 		{
 			t->cb(this, static_cast<nrf_commands_t>(command), load, size,
 					t->userData);
@@ -88,19 +93,22 @@ void packetHandling::idle(arg_t arg)
 {
 	packetHandling * p = (packetHandling*) arg;
 	bool ok = p->RequestData();
-	palWritePad(TEST_LED_PORT3, TEST_LED_PIN3, ok);
+	//palWritePad(TEST_LED_PORT3, TEST_LED_PIN3, ok);
+	if (p->ft && p->ft->transmitting_state)
+		p->ft->transmitting_state(ok);
+	//palWritePad((GPIO_TypeDef* )p->ft->led_port, p->ft->led_pin, ok);
 
-	if (p->wdt)
+	if (p->ft && p->ft->clearwdt)
 	{
 		if (ok)
 		{
-			((p->wdt))();
+			p->ft->clearwdt();
 			p->last = chTimeNow();
 		}
 		else
 		{
 			if (!(chTimeNow() - p->last > S2ST(300)))
-				p->wdt();
+				p->ft->clearwdt();
 		}
 	}
 }

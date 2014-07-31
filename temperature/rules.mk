@@ -1,0 +1,3 @@
+TEMPERATURE_DIR := $(LIBRARIES)/temperature
+CPPFILES +=  $(TEMPERATURE_DIR)/Temperature.cpp
+INCDIR += $(TEMPERATURE_DIR)  

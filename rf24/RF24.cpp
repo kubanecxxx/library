@@ -744,7 +744,9 @@ void RF24::enableAckPayload(void)
 
 	if (ja != (_BV(EN_ACK_PAY) | _BV(EN_DPL)) || f > 7)
 	{
+#ifdef TEST_LED_PORT2
 		palSetPad(TEST_LED_PORT2,TEST_LED_PIN2);
+#endif
 		chDbgPanic("Cannot setup ack payload");
 		asm("nop");
 	}
