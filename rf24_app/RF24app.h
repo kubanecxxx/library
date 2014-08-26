@@ -34,6 +34,7 @@ public:
 		return rf->isAckPayloadAvailable();
 	}
 	uint8_t read_packet(uint16_t & command, void * load = NULL);
+	inline RF24* getRF() const {return rf;}
 
 private:
 	RF24 * rf;

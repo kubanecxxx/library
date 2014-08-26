@@ -109,6 +109,12 @@ void packetHandling::idle(arg_t arg)
 		{
 			if (!(chTimeNow() - p->last > S2ST(300)))
 				p->ft->clearwdt();
+
+			if (!chTimeNow() - p->last > S2ST(20))
+			{
+				p->ap->getRF()->flush_tx();
+				p->ap->getRF()->flush_rx();
+			}
 		}
 	}
 }
