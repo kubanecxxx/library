@@ -37,3 +37,8 @@ endif
 ifeq ($(USE_FONTS),yes)
 	include $(LIBRARIES)/fonts/rules.mk
 endif
+
+#use picoc C interrpreter
+ifeq ($(USE_PICOC),yes)
+    include $(LIBRARIES)/picoc/rules.mk
+endif
