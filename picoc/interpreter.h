@@ -549,16 +549,16 @@ struct Picoc_Struct
 };
 
 /* convenience macros */
-#define PlatformPrintf(pc,fmt, ... ) pc->platform->io->printf(pc,fmt,##__VA_ARGS__)
-#define PlatformVPrintf(pc,fmt,lst) pc->platform->io->printVf(pc,fmt,lst)
-#define PlatformDebugPrintf(pc,fmt,...) pc->platform->io->dprintf(pc,fmt,##__VA_ARGS__)
-#define PlatformGetLine(buf, maxlen, prompt) pc->platform->io->readline(buf,maxlen,prompt)
-#define PlatformGetCharacter() pc->platform->io->getch()
-#define PlatformMakeTempName(pc,outbuf) pc->platform->io->tempName(pc,outbuf)
+#define PlatformPrintf(pc,fmt, ... ) (pc)->platform->io->printf(pc,fmt,##__VA_ARGS__)
+#define PlatformVPrintf(pc,fmt,lst) (pc)->platform->io->printVf(pc,fmt,lst)
+#define PlatformDebugPrintf(pc,fmt,...) (pc)->platform->io->dprintf(pc,fmt,##__VA_ARGS__)
+#define PlatformGetLine(buf, maxlen, prompt) (pc)->platform->io->readline(buf,maxlen,prompt)
+#define PlatformGetCharacter(pc) (pc)->platform->io->getch()
+#define PlatformMakeTempName(pc,outbuf) (pc)->platform->io->tempName(pc,outbuf)
 
-#define PlatformInit(pc) pc->platform->cb->init(pc)
-#define PlatformCleanup(pc) pc->platform->cb->clean(pc)
-#define PlatformExit(pc,errCode) pc->platform->cb->exit(pc,errCode)
+#define PlatformInit(pc) (pc)->platform->cb->init(pc)
+#define PlatformCleanup(pc) (pc)->platform->cb->clean(pc)
+#define PlatformExit(pc,errCode) (pc)->platform->cb->exit(pc,errCode)
 
 
 /* table.c */

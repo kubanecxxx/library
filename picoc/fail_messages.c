@@ -36,11 +36,10 @@ static void PrintSourceTextErrorLine(Picoc * pc, const char *SourceText, int Lin
 		}
 
 		/* display the line */
-		/*
 		 for (CPos = LinePos; *CPos != '\n' && *CPos != '\0'; CPos++)
 		 PlatformPrintf(pc,"%c", *CPos);
 		 PlatformPrintf(pc, " ");
-		 */
+
 
 		/* display the error position */
 		for (CPos = LinePos, CCount = 0;
