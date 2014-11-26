@@ -1449,6 +1449,7 @@ void ExpressionParseFunctionCall(struct ParseState *Parser, struct ExpressionSta
     enum LexToken Token = LexGetToken(Parser, NULL, TRUE);    /* open bracket */
     enum RunMode OldMode = Parser->Mode;
     int i;
+    uint32_t t;
     
     if (RunIt)
     { 
@@ -1568,8 +1569,11 @@ void ExpressionParseFunctionCall(struct ParseState *Parser, struct ExpressionSta
         		if (i + 1 < ArgCount)
         			PlatformDebugPrintf(Parser->pc,", ");
         	}
-        	PlatformDebugPrintf(Parser->pc,");\n");
+        	PlatformDebugPrintf(Parser->pc,");");
+        	uint32_t t = ST2MS(chVTGetSystemTime());
+        	uint32_t mem = Parser->pc->HeapBottom - Parser->pc->HeapStackTop;
             FuncValue->Val->FuncDef.Intrinsic(Parser, ReturnValue, ParamArray, ArgCount);
+            PlatformDebugPrintf(Parser->pc, "%d ms %d bytes \n",ST2MS(chVTGetSystemTime()) -t,mem);
         }
 
         HeapPopStackFrame(Parser->pc);
