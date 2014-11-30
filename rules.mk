@@ -42,3 +42,7 @@ endif
 ifeq ($(USE_PICOC),yes)
     include $(LIBRARIES)/picoc/rules.mk
 endif
+
+ifeq ($(USE_SSD1289),yes)
+	include $(LIBRARIES)/ssd1289/ssd1289.mk
+endif

@@ -1,5 +1,5 @@
 PICOCDIR = $(LIBRARIES)/picoc
-PICOCSRC = $(wildcard $(PICOCDIR)/*.c)  
-CFILES += $(PICOCSRC)
+PICOCSRC = $(wildcard $(PICOCDIR)/*.c)
+#CFILES += $(PICOCSRC)
 INCDIR += $(PICOCDIR)
 
