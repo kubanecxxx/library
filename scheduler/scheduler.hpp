@@ -79,6 +79,11 @@ public:
 	{
 		return shNow();
 	}
+
+	inline systime_t Remains(void) const
+	{
+		return (del.period - (Now() - del.last));
+	}
 };
 
 #endif // SCHEDULER_HPP
