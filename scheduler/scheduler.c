@@ -164,7 +164,7 @@ void shUnregisterStruct(delay_t * del)
  */
 void shRunMethod(delay_t * method)
 {
-    chDbgAssert(method->method,"method is NULL","");
+    chDbgAssert(method->method,"method is NULL");
 	if (sysTime - method->last > method->period)
 	{
 		if (method->type == ONCE)
