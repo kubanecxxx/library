@@ -1,13 +1,21 @@
+set (LIBS)
 
-set (SH_SOURCES
-scheduler/scheduler.c
+if (NOT DEFINED LIBRARY_MODULES)
 
-)
+    set(LIBRARY_MODULES
+        scheduler crc esp
+        )
 
-set (SH_HEADERS
-scheduler/scheduler.h
-scheduler/scheduler.hpp
-)
+    message("library - select all modules by default (${LIBRARY_MODULES}). You can specify modules by variable LIBRARY_MODULES")
+endif()
 
-add_library(library OBJECT ${SH_SOURCES} ${SH_HEADERS})
-target_include_directories(user_code PUBLIC scheduler)
+foreach(VAR ${LIBRARY_MODULES})
+    add_subdirectory(${VAR})
+    list (APPEND LIBS $<TARGET_OBJECTS:${VAR}>)
+endforeach()
+
+add_library(library STATIC ${LIBS})
+
+
+
+
