@@ -175,6 +175,7 @@ uint8_t esp_connect_to_wifi(const char *essid, const char *password)
 {
     char buffer[128];
     uint8_t ok;
+
     /*
     ok = esp_run_command("AT+RST", 100,buffer);
     int16_t z = sdGetTimeout(uart,MS2ST(1));
@@ -183,6 +184,7 @@ uint8_t esp_connect_to_wifi(const char *essid, const char *password)
         z = sdGetTimeout(uart,MS2ST(1));
     }
     */
+
 
     ok = esp_run_command("AT", 20, buffer);
     if (!ok)
@@ -205,8 +207,8 @@ int16_t esp_ping(const char * address)
     int16_t ping = 0;
 
     chprintf(stream,"AT+PING=\"%s\"\r\n",address);
-    uint8_t ok = wait_for_data(35,buffer, cfg->wdt);
-    chThdSleepMilliseconds(1500);
+    uint8_t ok = wait_for_data(1500,buffer, cfg->wdt);
+
 
     p = strchr(buffer, '+');
     p = strchr(p, '+');

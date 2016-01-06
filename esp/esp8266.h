@@ -1,6 +1,10 @@
 #ifndef ESP8266_H
 #define ESP8266_H
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 typedef struct
 {
     const char * text;
@@ -27,6 +31,7 @@ void esp_write_tcp(char * buf, uint8_t size, uint8_t tcp_id);
 uint8_t esp_run_sequence(const esp_command_t * command_list, uint8_t count);
 uint8_t esp_run_command(const char * text, uint16_t timeout, char * response);
 int16_t esp_signal_strength(void);
+int16_t esp_ping(const char * address);
 
 
 uint8_t esp_connect_to_wifi(const char * essid, const char * password);
@@ -57,5 +62,10 @@ void esp_basic_commands(const char * raw, uint8_t len, uint8_t tcp_id);
 // 'G' 2bytes coded index ;4 bytes coded data
 // 'P' 2bytes code index
 void esp_simple_modbus(const char * raw, uint8_t len, uint8_t tcp_id, uint16_t * array, uint8_t array_size);
+
+#ifdef __cplusplus
+}
+#endif
+
 
 #endif // ESP8266_H
