@@ -194,6 +194,7 @@ uint8_t esp_connect_to_wifi(const char *essid, const char *password)
 {
     char buffer[128];
     uint8_t ok;
+
     /*
     ok = esp_run_command("AT+RST", 100,buffer);
     int16_t z = sdGetTimeout(uart,MS2ST(1));

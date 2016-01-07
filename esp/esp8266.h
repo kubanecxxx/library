@@ -31,6 +31,7 @@ void esp_write_tcp(const char * buf, uint8_t size, uint8_t tcp_id);
 uint8_t esp_run_sequence(const esp_command_t * command_list, uint8_t count);
 uint8_t esp_run_command(const char * text, uint16_t timeout, char * response, uint16_t buffer_size);
 int16_t esp_signal_strength(void);
+int16_t esp_ping(const char * address);
 
 
 uint8_t esp_connect_to_wifi(const char * essid, const char * password);
@@ -66,5 +67,6 @@ void esp_simple_modbus(const char * raw, uint8_t len, uint8_t tcp_id, uint16_t *
 #ifdef __cplusplus
 }
 #endif
+
 
 #endif // ESP8266_H
