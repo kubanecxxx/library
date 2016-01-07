@@ -10,7 +10,7 @@
 
 static SerialDriver * uart = NULL;
 static BaseSequentialStream * stream = NULL;
-uint8_t wait_for_data(uint16_t to, char * buf, reset_watchdog_t cb);
+uint8_t wait_for_data(uint16_t to, char * buf, uint16_t buf_size, reset_watchdog_t cb);
 static systime_t last_data_rec;
 
 static const esp_config_t * cfg;
@@ -102,6 +102,25 @@ void itoa(char *out, uint32_t in, uint8_t bytes, uint8_t radix)
     out[2 * bytes] = 0;
 }
 
+char atoi10(const char * in)
+{
+    char z;
+    uint8_t b,i;
+    char ret = 0;
+    for (i = 0 ; i < 2 ; i++)
+    {
+        z = *in;
+        in++;
+        if (z >= '0' && z <= '9')
+        {
+            b = z - '0';
+        }
+
+        ret = (ret * 10) + b;
+    }
+
+    return ret;
+}
 
 char atoi(const char * in)
 {
@@ -151,7 +170,7 @@ int16_t esp_signal_strength()
     char buffer[128];
     char * p ;
 
-    if (esp_run_command("AT+CWJAP?", 100,buffer))
+    if (esp_run_command("AT+CWJAP?", 100,buffer,sizeof(buffer)))
     {
         p = strrchr(buffer,'-');
         if (p)
@@ -184,16 +203,16 @@ uint8_t esp_connect_to_wifi(const char *essid, const char *password)
     }
     */
 
-    ok = esp_run_command("AT", 20, buffer);
+    ok = esp_run_command("AT", 20, buffer,sizeof(buffer));
     if (!ok)
         return 0;
 
-    ok = esp_run_command("AT+CWMODE=1", 500, buffer);
+    ok = esp_run_command("AT+CWMODE=1", 500, buffer, sizeof(buffer));
     if (!ok)
         return 0;
 
     chprintf(stream,"AT+CWJAP=\"%s\",\"%s\"\r\n",essid,password);
-    ok = wait_for_data(20000, buffer, cfg->wdt);
+    ok = wait_for_data(20000, buffer, sizeof(buffer), cfg->wdt);
 
     return ok;
 }
@@ -205,7 +224,7 @@ int16_t esp_ping(const char * address)
     int16_t ping = 0;
 
     chprintf(stream,"AT+PING=\"%s\"\r\n",address);
-    uint8_t ok = wait_for_data(35,buffer, cfg->wdt);
+    uint8_t ok = wait_for_data(35,buffer, sizeof(buffer), cfg->wdt);
     chThdSleepMilliseconds(1500);
 
     p = strchr(buffer, '+');
@@ -275,19 +294,19 @@ uint8_t esp_keep_connected_loop(uint16_t open_port, uint8_t force_reconnect)
             old_port = open_port;
             //already connected
             //if connection doesnt exists it will be error
-            ok = esp_run_command("AT+CIPCLOSE",500,buffer);
-            ok = esp_run_command("AT+CIPMUX=1",500,buffer);
-            ok = esp_run_command("AT+CIPCLOSE=0",500,buffer);
-            ok = esp_run_command("AT+CIPCLOSE=1",500,buffer);
-            ok = esp_run_command("AT+CIPCLOSE=2",500,buffer);
-            ok = esp_run_command("AT+CIPCLOSE=3",500,buffer);
-            ok = esp_run_command("AT+CIPCLOSE=4",500,buffer);
-            ok = esp_run_command("AT+CIPSERVER=0",500,buffer);
+            ok = esp_run_command("AT+CIPCLOSE",500,buffer,sizeof(buffer));
+            ok = esp_run_command("AT+CIPMUX=1",500,buffer,sizeof(buffer));
+            ok = esp_run_command("AT+CIPCLOSE=0",500,buffer,sizeof(buffer));
+            ok = esp_run_command("AT+CIPCLOSE=1",500,buffer,sizeof(buffer));
+            ok = esp_run_command("AT+CIPCLOSE=2",500,buffer,sizeof(buffer));
+            ok = esp_run_command("AT+CIPCLOSE=3",500,buffer,sizeof(buffer));
+            ok = esp_run_command("AT+CIPCLOSE=4",500,buffer,sizeof(buffer));
+            ok = esp_run_command("AT+CIPSERVER=0",500,buffer,sizeof(buffer));
 
             if (open_port)
             {
                 chprintf(stream,"AT+CIPSERVER=1,%d\r\n",open_port);
-                ok = wait_for_data(500,buffer, NULL);
+                ok = wait_for_data(500,buffer, sizeof(buffer), NULL);
             }
             else
             {
@@ -300,12 +319,14 @@ uint8_t esp_keep_connected_loop(uint16_t open_port, uint8_t force_reconnect)
     return ok;
 }
 
-
-uint8_t esp_run_command(const char * text, uint16_t timeout, char * response)
+uint8_t esp_run_command(const char * text, uint16_t timeout, char * response, uint16_t buffer_size)
 {
     chprintf(stream,text);
     chprintf(stream,"\r\n");
-    return wait_for_data(timeout,response,NULL);
+    uint8_t ok = 0;
+    if (response)
+        ok = wait_for_data(timeout,response, buffer_size,NULL);
+    return ok;
 }
 
 uint8_t esp_run_sequence(const esp_command_t *commands, uint8_t count)
@@ -320,7 +341,7 @@ uint8_t esp_run_sequence(const esp_command_t *commands, uint8_t count)
     {
         to = commands[j].timeout;
         text = commands[j].text;
-        status = esp_run_command(text,to, buffer);
+        status = esp_run_command(text,to, buffer,sizeof(buffer));
 
         if (!status)
             return 0;
@@ -350,10 +371,11 @@ uint16_t esp_decode_ipd(char * buf, uint8_t * iid)
 
     *(buff + len) = 0;
 
-    p = strchr(buff,':');
     po = contains(buff,"+IPD");
     if (!po)
         return 0;
+
+    p = strchr(buff,':');
     while (!p)
     {
         t = sdGetTimeout(uart, MS2ST(10));
@@ -363,6 +385,13 @@ uint16_t esp_decode_ipd(char * buf, uint8_t * iid)
         *(buff + len++) = t;
         *(buff + len) = 0;
         p = strchr(buff,':');
+
+        if (len > 15)
+        {
+            //return 0;
+            //not valid packet - flush queue
+            p = 0;
+        }
     }
 
     if (p)
@@ -383,7 +412,8 @@ uint16_t esp_decode_ipd(char * buf, uint8_t * iid)
 
     //read data
     uint16_t l;
-    l = sdReadTimeout(uart,(uint8_t *)buf,len, MS2ST(len));
+    l = sdReadTimeout(uart,(uint8_t *)buf,len, MS2ST(5*len));
+
     if (len != l)
         return 0;
     *(buf + len) = 0;
@@ -393,7 +423,7 @@ uint16_t esp_decode_ipd(char * buf, uint8_t * iid)
 }
 
 
-uint8_t wait_for_data(uint16_t to, char * buf, reset_watchdog_t cb)
+uint8_t wait_for_data(uint16_t to, char * buf, uint16_t buf_size, reset_watchdog_t cb)
 {
     chDbgAssert(buf, "cannot be zero");
     char * p;
@@ -401,6 +431,7 @@ uint8_t wait_for_data(uint16_t to, char * buf, reset_watchdog_t cb)
     msg_t z;
 
     p = buf;
+    uint16_t idx = 0;
     for (i = 0 ; i < to; i++)
     {
         z = sdGetTimeout(uart,MS2ST(1));
@@ -413,6 +444,17 @@ uint8_t wait_for_data(uint16_t to, char * buf, reset_watchdog_t cb)
             *p = z;
             p++;
             *p = 0;
+            idx++;
+
+            if (idx > buf_size - 1)
+            {
+                asm ("nop");
+                //flush buffer
+                while(!sdGetWouldBlock(uart))
+                    sdGet(uart);
+
+                return 0;
+            }
         }
 
         if (cb)
@@ -439,15 +481,15 @@ void esp_write_tcp_char(char c, uint8_t tcp_id)
     esp_write_tcp(buf,1, tcp_id);
 }
 
-void esp_write_tcp(char * buf, uint8_t size, uint8_t tcp_id)
+void esp_write_tcp(const char * buf, uint8_t size, uint8_t tcp_id)
 {
     uint8_t ok;
     char buffer[200];
     chprintf(stream,"AT+CIPSEND=%d,%04d\r\n",tcp_id, size);
-    ok = wait_for_data(4000,buffer,cfg->wdt);
+    ok = wait_for_data(4000,buffer, sizeof (buffer),cfg->wdt);
     sdWrite(uart,(uint8_t *)buf,size);
     chprintf(stream,"\r");
-    ok = wait_for_data(4000,buffer,cfg->wdt);
+    ok = wait_for_data(4000,buffer, sizeof(buffer),cfg->wdt);
 }
 
 const char * contains(const char * string, const char * substring)

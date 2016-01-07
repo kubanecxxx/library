@@ -1,6 +1,10 @@
 #ifndef ESP8266_H
 #define ESP8266_H
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 typedef struct
 {
     const char * text;
@@ -23,9 +27,9 @@ typedef struct
 void esp_set_sd(const esp_config_t * config);
 uint16_t esp_decode_ipd(char * buf, uint8_t * id);
 void esp_write_tcp_char(char c, uint8_t tcp_id);
-void esp_write_tcp(char * buf, uint8_t size, uint8_t tcp_id);
+void esp_write_tcp(const char * buf, uint8_t size, uint8_t tcp_id);
 uint8_t esp_run_sequence(const esp_command_t * command_list, uint8_t count);
-uint8_t esp_run_command(const char * text, uint16_t timeout, char * response);
+uint8_t esp_run_command(const char * text, uint16_t timeout, char * response, uint16_t buffer_size);
 int16_t esp_signal_strength(void);
 
 
@@ -35,6 +39,7 @@ uint8_t esp_keep_connected_loop(uint16_t open_port, uint8_t force_reconnect);
 //helper functions
 uint16_t atoiw(const char * in);
 char atoi(const char * in);
+char atoi10(const char * in);
 const char * contains(const char * string, const char * substring);
 void itoa(char * out, uint32_t in, uint8_t bytes, uint8_t radix);
 
@@ -57,5 +62,9 @@ void esp_basic_commands(const char * raw, uint8_t len, uint8_t tcp_id);
 // 'G' 2bytes coded index ;4 bytes coded data
 // 'P' 2bytes code index
 void esp_simple_modbus(const char * raw, uint8_t len, uint8_t tcp_id, uint16_t * array, uint8_t array_size);
+
+#ifdef __cplusplus
+}
+#endif
 
 #endif // ESP8266_H
