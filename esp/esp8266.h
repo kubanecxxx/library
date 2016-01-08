@@ -28,6 +28,7 @@ void esp_set_sd(const esp_config_t * config);
 uint16_t esp_decode_ipd(char * buf, uint8_t * id);
 void esp_write_tcp_char(char c, uint8_t tcp_id);
 void esp_write_tcp(const char * buf, uint8_t size, uint8_t tcp_id);
+void esp_write_udp(const char * buf, uint8_t size, uint8_t tcp_id);
 uint8_t esp_run_sequence(const esp_command_t * command_list, uint8_t count);
 uint8_t esp_run_command(const char * text, uint16_t timeout, char * response, uint16_t buffer_size);
 int16_t esp_signal_strength(void);

@@ -431,6 +431,7 @@ uint8_t wait_for_data(uint16_t to, char * buf, uint16_t buf_size, reset_watchdog
     uint16_t i;
     msg_t z;
 
+    buf[0] = 0; //reset string
     p = buf;
     uint16_t idx = 0;
     for (i = 0 ; i < to; i++)
@@ -491,6 +492,17 @@ void esp_write_tcp(const char * buf, uint8_t size, uint8_t tcp_id)
     sdWrite(uart,(uint8_t *)buf,size);
     chprintf(stream,"\r");
     ok = wait_for_data(4000,buffer, sizeof(buffer),cfg->wdt);
+}
+
+void esp_write_udp(const char * buf, uint8_t size, uint8_t tcp_id)
+{
+    uint8_t ok;
+    char buffer[200];
+    chprintf(stream,"AT+CIPSEND=%d,%04d\r\n",tcp_id, size);
+    ok = wait_for_data(4000,buffer, sizeof (buffer),cfg->wdt);
+    sdWrite(uart,(uint8_t *)buf,size);
+    sdPut(uart,'\r');
+    ok = wait_for_data(200,buffer, sizeof(buffer),cfg->wdt);
 }
 
 const char * contains(const char * string, const char * substring)
