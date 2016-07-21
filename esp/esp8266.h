@@ -20,15 +20,30 @@ typedef struct
     const char * essid;
     const char * password;
     uint16_t autoReconnectTimeout;     //automatic reconnect timeout when no data arrives [seconds]
+
 } esp_config_t;
 
+//message type
+typedef struct
+{
+    char * data;
+    uint16_t length;
+    uint8_t id;
+    uint8_t valid;
+} ipd_data_t;
+
+//message type
+typedef struct
+{
+    char * data;
+    uint8_t status;
+} at_data_t;
 
 
 void esp_set_sd(const esp_config_t * config);
-uint16_t esp_decode_ipd(char * buf, uint8_t * id);
+uint16_t esp_decode_ipd(char * buf, uint16_t buf_size, uint8_t * id);
 void esp_write_tcp_char(char c, uint8_t tcp_id);
 void esp_write_tcp(const char * buf, uint8_t size, uint8_t tcp_id);
-void esp_write_udp(const char * buf, uint8_t size, uint8_t tcp_id);
 uint8_t esp_run_sequence(const esp_command_t * command_list, uint8_t count);
 uint8_t esp_run_command(const char * text, uint16_t timeout, char * response, uint16_t buffer_size);
 int16_t esp_signal_strength(void);
@@ -41,7 +56,7 @@ uint8_t esp_keep_connected_loop(uint16_t open_port, uint8_t force_reconnect);
 //helper functions
 uint16_t atoiw(const char * in);
 char atoi(const char * in);
-char atoi10(const char * in);
+uint32_t atoi10(const char * in, uint8_t bytes);
 const char * contains(const char * string, const char * substring);
 void itoa(char * out, uint32_t in, uint8_t bytes, uint8_t radix);
 
